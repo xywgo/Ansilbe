@@ -1,0 +1,32 @@
+---
+# tasks file for /home/ubuntu/ansible/roles/init
+
+- name: Update apt cache (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Upgrade packages ((Debian/Ubuntu)
+  ansible.builtin.apt:
+    upgrade: dist
+    cache_valid_time: 3600
+  when: ansible_facts['pkg_mgr'] =='apt'
+
+- name: Install common tools
+  ansible.builtin.apt:
+    name: tree
+    state: latest
+    only_upgrade: true
+
+- name: Install Qemu-guest-agent
+  ansible.builtin.apt:
+    name: qemu-guest-agent
+    state: present
+  when: "'local_vm' in group_names"  # 检查是否属于 local_vm 组
+
+- name: Ensure qemu-guest-agent service is started and enabled
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    state: started
+    enabled: true
+  when: "'local_vm' in group_names"  # 检查是否属于 local_vm 组

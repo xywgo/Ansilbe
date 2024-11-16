@@ -1,0 +1,5 @@
+[local_vm]
+staging
+
+[cloud]
+lightsail-sg
