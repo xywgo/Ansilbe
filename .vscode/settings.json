@@ -1,4 +1,5 @@
 {
     "editor.fontFamily": "MesloLGS NF",
-    "terminal.integrated.fontFamily": "MesloLGS NF"
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "ansible.python.interpreterPath": "/bin/python3"
 }
