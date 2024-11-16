@@ -1,2 +1,5 @@
 ---
 # defaults file for /home/ubuntu/ansible/roles/init
+
+init_user_name: "ubuntu"
+init_timezone: "Asia/Shanghai"

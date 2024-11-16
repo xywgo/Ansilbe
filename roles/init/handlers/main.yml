@@ -1,2 +1,18 @@
 ---
 # handlers file for /home/ubuntu/ansible/roles/init
+
+- name: Add user to sudoers
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    line: "{{ init_user_name }} ALL=(ALL) NOPASSWD: ALL"
+    validate: 'visudo -cf %s'
+  when: user_created.changed
+  listen: Add user to sudoers
+
+- name: Ensure qemu-guest-agent service is started and enabled
+  ansible.builtin.service:
+    name: qemu-guest-agent
+    state: started
+    enabled: true
+  when: qemu_guest_agent_installed.changed
+  listen: Ensure qemu-guest-agent service is started and enabled

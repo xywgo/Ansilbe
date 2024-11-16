@@ -12,21 +12,33 @@
     cache_valid_time: 3600
   when: ansible_facts['pkg_mgr'] =='apt'
 
-- name: Install common tools
+- name: Install common packages
   ansible.builtin.apt:
-    name: tree
-    state: latest
-    only_upgrade: true
+    name:
+      - vim
+      - curl
+      - git
+      - htop
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ init_timezone }}"
+
+- name: Create user
+  ansible.builtin.user:
+    name: "{{ init_user_name }}"
+    state: present
+    shell: /bin/bash
+    update_password: always
+  register: user_created
+  notify: Add user to sudoers
 
 - name: Install Qemu-guest-agent
   ansible.builtin.apt:
     name: qemu-guest-agent
     state: present
   when: "'local_vm' in group_names"  # 检查是否属于 local_vm 组
-
-- name: Ensure qemu-guest-agent service is started and enabled
-  ansible.builtin.service:
-    name: qemu-guest-agent
-    state: started
-    enabled: true
-  when: "'local_vm' in group_names"  # 检查是否属于 local_vm 组
+  register: qemu_guest_agent_installed
+  notify: Ensure qemu-guest-agent service is started and enabled
