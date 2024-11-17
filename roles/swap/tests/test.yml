@@ -1,5 +1,9 @@
 ---
-- hosts: localhost
-  remote_user: root
+
+- name: "配置交换空间"
+  hosts: localhost
+  remote_user: ubuntu
   roles:
-    - swap
+    - role: swap
+      vars:
+        swap_state: present
