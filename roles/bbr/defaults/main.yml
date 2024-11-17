@@ -2,4 +2,4 @@
 # defaults file for roles/bbr
 
 # 定义 BBR 所需的最低内核版本
-min_kernel_version: "4.9"
+bbr_min_kernel_version: "4.9"

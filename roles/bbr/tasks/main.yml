@@ -13,10 +13,10 @@
 
 - name: Ensure kernel version is or newer
   ansible.builtin.fail:
-    msg: "Kernel version is too old. Minimum required: {{ min_kernel_version }}"
-  when: kernel_version.stdout is version(min_kernel_version, '<')
+    msg: "Kernel version is too old. Minimum required: {{ bbr_min_kernel_version }}"
+  when: kernel_version.stdout is version(bbr_min_kernel_version, '<')
 
-# 配置 sysctl 参数以启用 BBR {{ min_kernel_version }} 或更新
+# 配置 sysctl 参数以启用 BBR {{ bbr_min_kernel_version }} 或更新
 - name: Configure sysctl for BBR
   block:
     - name: Add BBR parameters to sysctl.conf
