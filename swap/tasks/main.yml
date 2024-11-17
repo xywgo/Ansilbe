@@ -1,0 +1,21 @@
+---
+# tasks file for swap
+- name: Manage swap file
+  ansible.posix.mount:
+    name: none
+    src: "{{ swap_path }}"
+    fstype: swap
+    opts: sw
+    state: "{{ swap_state }}"
+
+- name: Check swap on server
+  ansible.builtin.include_tasks: check.yml
+  when: swap_state == 'present'
+
+- name: Disable swap on server
+  ansible.builtin.include_tasks: disable.yml
+  when: swap_state == 'absent' or swap_state == 'present' and swap_existing_size != swap_size
+
+- name: Enable swap on server
+  ansible.builtin.include_tasks: enable.yml
+  when: swap_state == 'present'

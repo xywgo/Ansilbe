@@ -5,7 +5,7 @@
   ansible.builtin.lineinfile:
     path: /etc/sudoers
     line: "{{ init_user_name }} ALL=(ALL) NOPASSWD: ALL"
-    validate: 'visudo -cf %s'
+    validate: "visudo -cf %s"
   when: user_created.changed
   listen: Add user to sudoers
 

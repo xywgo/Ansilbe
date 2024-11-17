@@ -1,0 +1,10 @@
+---
+# defaults file for swap
+# swap 文件路径
+swap_path: /swapfile
+# swap 文件大小，单位为 MB
+swap_size: 2048
+# 是否启用 swap 文件
+swap_state: absent
+# 系统 swappiness 值，范围为 0-100
+swap_swappiness: 60

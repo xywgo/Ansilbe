@@ -1,22 +1,14 @@
 ---
-- name: Setup server && install docker
+- name: Setup server and install docker
   hosts: all
   become: true
   roles:
     - init
-    - geerlingguy.docker
-
-  tasks:
-    # 将当前用户添加到 Docker 组中，以便用户无需 sudo 就能运行 Docker 命令
-    - name: Add user to docker group
-      ansible.builtin.user:
-        name: "{{ ansible_user }}" # 使用当前 Ansible 执行用户
-        groups: docker # 将用户添加到 docker 组
-        append: true # 确保不会移除用户原有的组
-
-    # 确保当前用户可以立即使用 docker 命令，无需重启
-    - name: Ensure the user can use docker without rebooting
-      ansible.builtin.command: newgrp docker
-      become: true # 使用 sudo 执行
-      changed_when: false # 该任务不会改变系统状态
-      when: ansible_user != 'root' # 仅对非 root 用户执行
+    - role: swap
+      vars:
+        swap_state: 'present' # 配置是否要设置swap 可选 present(配置) absent（不配置或移除）
+        swap_size: 2048
+    - role: geerlingguy.docker
+      vars:
+        docker_users:
+          - "{{ ansible_user }}"

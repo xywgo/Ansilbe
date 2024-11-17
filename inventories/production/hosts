@@ -1,0 +1,9 @@
+[localvm]
+staging
+
+[cloud]
+AWS
+lightsail-sg
+LightSail 
+GCP-Proxy ansible_user=xywgo
+Oracle-proxy

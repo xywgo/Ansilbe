@@ -1,0 +1,14 @@
+# playbook/debug.yml
+
+- name: Debug Playbook
+  hosts: all
+  become: true
+  gather_facts: true  # 确保启用 gather_facts
+  tasks:
+    - name: Print Ansible user
+      ansible.builtin.debug:
+        msg: "The Ansible user is {{ ansible_user }}"
+
+    - name: Print docker user frome /group_vars/all.yml
+      ansible.builtin.debug:
+        msg: "The docker user is {{ docker_user }}"

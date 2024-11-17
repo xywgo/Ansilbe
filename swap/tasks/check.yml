@@ -1,0 +1,17 @@
+---
+- name: Check if swap exists
+  ansible.builtin.stat:
+    path: "{{ swap_path }}"
+    get_checksum: false
+  register: swap_check
+  changed_when: false
+
+- name: Set swap_existing_size fact
+  ansible.builtin.set_fact:
+    swap_existing_size: "{{ (swap_check.stat.size / 1024 / 1024) | int }}"
+  when: swap_check.stat.exists
+
+- name: Set swap_existing_size if not existing swap
+  ansible.builtin.set_fact:
+    swap_existing_size: "{{ swap_size }}"
+  when: not swap_check.stat.exists

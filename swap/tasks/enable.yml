@@ -1,0 +1,12 @@
+---
+- name: Create swap file
+  ansible.builtin.file:
+    path: "{{ swap_path }}"
+    state: touch
+    mode: "0600"
+  register: swap_file_created
+  notify:
+    - Allocate space for swap file
+    - Make swap file
+    - Enable swap file
+    - Set swappiness

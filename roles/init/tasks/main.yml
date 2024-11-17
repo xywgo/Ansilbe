@@ -39,6 +39,6 @@
   ansible.builtin.apt:
     name: qemu-guest-agent
     state: present
-  when: "'local_vm' in group_names"  # 检查是否属于 local_vm 组
+  when: "'localvm' in group_names" # 检查是否属于 localvm 组
   register: qemu_guest_agent_installed
   notify: Ensure qemu-guest-agent service is started and enabled
