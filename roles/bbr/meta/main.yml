@@ -1,0 +1,41 @@
+---
+# 此文件定义角色的元信息，例如作者、描述、平台支持以及依赖关系
+
+# 角色的简要描述
+galaxy_info:
+  role_name: bbr # 角色名称
+  author: xywgo # 作者名称
+  description: "Ansible role to enable and configure BBR (Bottleneck Bandwidth and Round-trip propagation time) for TCP congestion control." # 简要描述角色功能
+  company: YourCompany # 公司名称，可选
+  license: MIT # 使用的许可证类型，例如 MIT、GPLv3、Apache 等
+
+  # 角色支持的平台和版本
+  platforms:
+    - name: Debian # 支持的操作系统
+      versions:
+        - buster # Debian 10
+        - bullseye # Debian 11
+    - name: Ubuntu
+      versions:
+        - focal # Ubuntu 20.04
+        - jammy # Ubuntu 22.04
+
+  # 分类标签，用于 Ansible Galaxy 中的搜索
+  galaxy_tags:
+    - performance # 与性能优化相关
+    - networking # 与网络相关
+    - tcp # 与 TCP 协议相关
+    - linux # Linux 系统
+
+  # 角色的最低 Ansible 版本要求
+  min_ansible_version: "2.9"
+
+# 角色的依赖关系
+dependencies:
+    # 这里可以列出其他角色的依赖，如果没有依赖则留空
+    # 示例：
+    # - role: some.other_role
+    #   version: 1.0.0
+    # - role: another_role
+    #   when: ansible_distribution == "Ubuntu"
+  []

@@ -1,0 +1,6 @@
+---
+- name: Test BBR role
+  hosts: localhost
+  become: true
+  roles:
+    - bbr

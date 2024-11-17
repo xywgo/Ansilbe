@@ -5,19 +5,19 @@
   ansible.builtin.command:
     cmd: "fallocate -l {{ swap_size }}M {{ swap_path }}"
   when: swap_file_created.changed
-  changed_when: true
+  changed_when: false
 
 - name: Make swap file
   ansible.builtin.command:
     cmd: "mkswap {{ swap_path }}"
   when: swap_file_created.changed
-  changed_when: true
+  changed_when: false
 
 - name: Enable swap file
   ansible.builtin.command:
     cmd: "swapon {{ swap_path }}"
   when: swap_file_created.changed
-  changed_when: true
+  changed_when: false
 
 - name: Set swappiness
   ansible.posix.sysctl:

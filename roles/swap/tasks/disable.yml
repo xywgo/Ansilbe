@@ -2,20 +2,20 @@
 - name: Check if swap is active
   ansible.builtin.command: swapon --show
   register: swap_status
-  changed_when: false  # 如果没有启用 swap，这个任务不标记为 changed
+  changed_when: false # 如果没有启用 swap，这个任务不标记为 changed
   failed_when: false
 
 - name: Disable swap and remove swap file if it exists
   block:
     - name: Disable swap file
       ansible.builtin.command: swapoff -a
-      when: swap_status.stdout | length > 0  # 只有在启用了 swap 时才禁用
-      changed_when: true  # 如果禁用了 swap，标记为 changed
-      failed_when: false  # 不使任务失败，即使禁用失败
+      when: swap_status.stdout | length > 0 # 只有在启用了 swap 时才禁用
+      changed_when: true # 如果禁用了 swap，标记为 changed
+      failed_when: false # 不使任务失败，即使禁用失败
 
     - name: Remove swap file if it exists
       ansible.builtin.file:
         path: "{{ swap_path }}"
         state: absent
-      changed_when: true  # 如果删除文件成功，标记为 changed
-      failed_when: false  # 即使删除失败，仍然继续执行
+      changed_when: true # 如果删除文件成功，标记为 changed
+      failed_when: false # 即使删除失败，仍然继续执行

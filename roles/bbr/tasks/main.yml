@@ -1,0 +1,53 @@
+---
+# tasks file for roles/bbr
+
+# 定义最低内核版本号
+- name: Check kernel version
+  ansible.builtin.shell: |
+    set -o pipefail
+    uname -r | awk -F'.' '{print $1"."$2}'
+  register: kernel_version
+  changed_when: false
+  args:
+    executable: /bin/bash
+
+- name: Ensure kernel version is or newer
+  ansible.builtin.fail:
+    msg: "Kernel version is too old. Minimum required: {{ min_kernel_version }}"
+  when: kernel_version.stdout is version(min_kernel_version, '<')
+
+# 配置 sysctl 参数以启用 BBR {{ min_kernel_version }} 或更新
+- name: Configure sysctl for BBR
+  block:
+    - name: Add BBR parameters to sysctl.conf
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.conf
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "net.core.default_qdisc=fq"
+        - "net.ipv4.tcp_congestion_control=bbr"
+      changed_when: false
+
+    - name: Reload sysctl configuration
+      ansible.posix.sysctl:
+        name: "{{ item.split('=')[0] }}"
+        value: "{{ item.split('=')[1] }}"
+        state: present
+      loop:
+        - "net.core.default_qdisc=fq"
+        - "net.ipv4.tcp_congestion_control=bbr"
+      changed_when: false
+
+# 验证 BBR 是否成功启用
+- name: Verify BBR is enabled
+  ansible.builtin.command: sysctl net.ipv4.tcp_congestion_control
+  register: bbr_status
+  changed_when: false
+
+- name: Assert BBR is active
+  ansible.builtin.assert:
+    that:
+      - "'bbr' in bbr_status.stdout"
+    success_msg: "BBR is successfully enabled."
+    fail_msg: "BBR is not enabled. Please check your configuration."

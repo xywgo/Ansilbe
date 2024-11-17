@@ -6,9 +6,15 @@
     - init
     - role: swap
       vars:
-        swap_state: 'present' # 配置是否要设置swap 可选 present(配置) absent（不配置或移除）
+        swap_state: "present" # 配置是否要设置swap 可选 present(配置) absent（不配置或移除）
         swap_size: 2048
     - role: geerlingguy.docker
       vars:
         docker_users:
           - "{{ ansible_user }}"
+
+- name: Enable BBR on servers
+  hosts: cloud
+  become: true
+  roles:
+    - bbr
