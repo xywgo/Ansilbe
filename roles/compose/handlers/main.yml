@@ -1,2 +1,15 @@
 ---
 # handlers file for roles/compose
+# Verify ACL configuration
+- name: Verify ACL configuration
+  ansible.builtin.command:
+    cmd: "getfacl ./containers"
+  args:
+    chdir: "{{ ansible_user_dir }}"
+  changed_when: false
+
+# Display ACL configuration
+- name: Display ACL configuration
+  ansible.builtin.debug:
+    msg: "{{ acl_output.stdout }}"
+  changed_when: false

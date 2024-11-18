@@ -1,0 +1,25 @@
+---
+- name: Copy docker compose apps to server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../roles/compose/files/compose/{{ item }}.yml"
+    dest: "{{ compose_root_dir }}/compose/{{ ansible_hostname }}/{{ item }}.yml"
+    mode: "775"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ compose_apps }}"
+
+- name: Add apps path to docker-compose file (lineinfile)
+  ansible.builtin.lineinfile:
+    path: "{{ compose_root_dir }}/docker-compose.yml"
+    line: "  - compose/$HOSTNAME/{{ item }}.yml"
+    insertafter: "include:"
+    state: present
+  loop: "{{ compose_apps }}"
+
+- name: Deploy docker compose apps
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_root_dir }}"
+    state: present
+    profiles: "all"
+  become_user: "{{ ansible_user }}"
+

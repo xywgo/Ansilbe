@@ -18,3 +18,16 @@
   become: true
   roles:
     - bbr
+
+- name: Compose docker apps
+  hosts: cloud
+  roles:
+    - role: compose
+      vars:
+        compose_root_dir: /home/{{ ansible_user }}/containers
+        compose_proxy_enable: true
+        compose_traefik_enable: false
+        compose_apps:
+          # - sing-box
+          - portainer
+          # - semaphore

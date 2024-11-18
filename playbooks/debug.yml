@@ -1,14 +1,13 @@
-# playbook/debug.yml
-
-- name: Debug Playbook
-  hosts: all
-  become: true
-  gather_facts: true  # 确保启用 gather_facts
-  tasks:
-    - name: Print Ansible user
-      ansible.builtin.debug:
-        msg: "The Ansible user is {{ ansible_user }}"
-
-    - name: Print docker user frome /group_vars/all.yml
-      ansible.builtin.debug:
-        msg: "The docker user is {{ docker_user }}"
+---
+- name: Test compose role
+  hosts: localhost
+  roles:
+    - role: compose
+      vars:
+        compose_root_dir: /home/ubuntu/containers
+        compose_proxy_enable: true
+        compose_traefik_enable: false
+        compose_apps:
+          # - sing-box
+          - portainer
+          # - semaphore

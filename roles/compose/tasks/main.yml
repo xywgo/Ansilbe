@@ -1,2 +1,45 @@
 ---
 # tasks file for roles/compose
+
+- name: Create directories for containers
+  ansible.builtin.file:
+    path: "{{ compose_root_dir }}/{{ item.path }}"
+    state: "{{ item.state }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop:
+    - { path: "compose", state: "directory", mode: "775" }
+    - { path: "compose/{{ ansible_hostname }}", state: "directory", mode: "775" }
+    - { path: "appdata", state: "directory", mode: "775" }
+    - { path: "logs", state: "directory", mode: "775" }
+    - { path: "scripts", state: "directory", mode: "775" }
+    - { path: "secrets", state: "directory", mode: "600" }
+    - { path: "shared", state: "directory", mode: "775" }
+
+- name: Copy .env file to server
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../roles/compose/templates/.env.j2"
+    dest: "{{ compose_root_dir }}/.env"
+    mode: "600"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Copy docker compose file to server
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../roles/compose/templates/docker-compose.j2"
+    dest: "{{ compose_root_dir }}/docker-compose.yml"
+    mode: "775"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Set containers ACL for ansible_user and docker
+  ansible.builtin.include_tasks: setacl.yml
+
+- name: Deploy docker compose apps
+  ansible.builtin.include_tasks: install.yml
+  when: compose_apps is defined and compose_apps is not none
+
+- name: Generate Sing-box Configure
+  ansible.builtin.include_tasks: sing-box.yml
+  when: "compose_apps is defined and compose_apps is not none and 'sing-box' in compose_apps"

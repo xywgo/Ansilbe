@@ -1,0 +1,19 @@
+---
+# Install ACL package
+- name: Ensure ACL is installed
+  ansible.builtin.package:
+    name: acl
+    state: present
+
+# Set ACL for user and group
+- name: Set ACL permissions for user and group on containers directory
+  ansible.builtin.shell:
+    cmd: |
+      setfacl -Rdm u:{{ ansible_user }}:rwx,g:docker:rwx {{ compose_root_dir }}
+      setfacl -Rm u:{{ ansible_user }}:rwx,g:docker:rwx {{ compose_root_dir }}
+  args:
+    chdir: "{{ ansible_user_dir }}"
+  changed_when: false # Prevent unnecessary "changed" output
+  notify:
+    - Verify ACL configuration
+    - Display ACL configuration

@@ -1,0 +1,43 @@
+#------------------------- ENVIRONMENT
+# My Docker Hosts:
+
+#------------------------- THIS COMPOSE FILE
+
+
+# +++++++++++++NETWORKS++++++++
+{% if compose_proxy_enable or compose_traefik_enable %}
+networks:
+  {% if compose_proxy_enable -%}
+  nproxy:
+    name: nproxy
+    driver: bridge
+  {% endif -%}
+  
+  {%- if compose_traefik_enable -%}
+  traefik:
+    name: traefik
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+  {% endif %}
+{% endif %}
+
+include:
+  # ++++++++++++++SERVICES++++++++
+
+  # ==============CORE============
+
+  # ==============MEDIA===========
+
+  # ==============Storage=========
+
+  # ==============Web=============
+
+  # ==============DATABASES=======
+
+  # ==============SNS=============
+
+  # ==============MONITORING======
+
+  # ==============NPROXY==========
