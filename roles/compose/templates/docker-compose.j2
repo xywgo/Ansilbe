@@ -25,6 +25,9 @@ networks:
 
 include:
   # ++++++++++++++SERVICES++++++++
+{% for app in compose_apps if app.state | default('present')!= 'absent' %}
+  - compose/$HOSTNAME/{{ app.name }}.yml
+{% endfor %}
 
   # ==============CORE============
 

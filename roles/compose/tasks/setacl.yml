@@ -11,6 +11,8 @@
     cmd: |
       setfacl -Rdm u:{{ ansible_user }}:rwx,g:docker:rwx {{ compose_root_dir }}
       setfacl -Rm u:{{ ansible_user }}:rwx,g:docker:rwx {{ compose_root_dir }}
+      setfacl -Rm u:{{ ansible_user }}:---,g:docker:--- {{ compose_root_dir }}/secrets
+      setfacl -Rm u:{{ ansible_user }}:---,g:docker:--- {{ compose_root_dir }}/.env
   args:
     chdir: "{{ ansible_user_dir }}"
   changed_when: false # Prevent unnecessary "changed" output

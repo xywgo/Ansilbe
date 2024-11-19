@@ -9,5 +9,12 @@
         compose_traefik_enable: false
         compose_apps:
           - name: portainer
-            state: present
+            state: absent
+            rm_conf: true
+          - name: sing-box
+            state: absent
+            genconf: false # 是否生成配置 默认vless+reality
+            rm_conf: true
+          - name: qbittorrent
+            state: absent
             rm_conf: true

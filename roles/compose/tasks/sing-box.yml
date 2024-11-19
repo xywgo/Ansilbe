@@ -40,6 +40,9 @@
 - name: Save generated variables to a file locally
   ansible.builtin.copy:
     content: |
+      Username: {{ compose_user_name }}
+      Server Ports: {{ compose_tls_handshake_server_port }}
+      Server Name: {{ compose_tls_server_name }}
       Private Key: {{ reality_private_key }}
       Public Key: {{ reality_public_key }}
       Short ID: {{ reality_short_id }}
@@ -70,10 +73,5 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Restart sing-box container using Docker Compose
-  community.docker.docker_compose_v2:
-    project_src: "{{ compose_root_dir }}" # 根据路径调整
-    state: restarted
-    services:
-      - sing-box
+  notify:
+    - Restart container to apply the new config

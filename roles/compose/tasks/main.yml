@@ -6,15 +6,15 @@
     path: "{{ compose_root_dir }}/{{ item.path }}"
     state: "{{ item.state }}"
     mode: "{{ item.mode }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ item.owner | default(ansible_user) }}"
+    group: "{{ item.group | default(ansible_user) }}"
   loop:
     - { path: "compose", state: "directory", mode: "775" }
     - { path: "compose/{{ ansible_hostname }}", state: "directory", mode: "775" }
     - { path: "appdata", state: "directory", mode: "775" }
     - { path: "logs", state: "directory", mode: "775" }
     - { path: "scripts", state: "directory", mode: "775" }
-    - { path: "secrets", state: "directory", mode: "600" }
+    - { path: "secrets", state: "directory", mode: "600", owner: "root", group: "root" }
     - { path: "shared", state: "directory", mode: "775" }
 
 - name: Copy .env file to server
@@ -22,8 +22,8 @@
     src: "{{ playbook_dir }}/../roles/compose/templates/.env.j2"
     dest: "{{ compose_root_dir }}/.env"
     mode: "600"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "root"
+    group: "root"
 
 - name: Set containers ACL for ansible_user and docker
   ansible.builtin.include_tasks: setacl.yml
