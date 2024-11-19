@@ -1,0 +1,56 @@
+---
+
+- name: Copy docker apps compose files to server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../roles/compose/files/compose/{{ item }}.yml"
+    dest: "{{ compose_root_dir }}/compose/{{ ansible_hostname }}/{{ item }}.yml"
+    mode: "775"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ compose_apps | map(attribute='name') | list }}"
+
+- name: Check Decommissioning or Not
+  when: compose_apps | selectattr('state', 'equalto', 'absent') | list | count != 0
+  block:
+    - name: Remove Docker Compose Apps
+      community.docker.docker_compose_v2:
+        project_src: "{{ compose_root_dir }}"
+        profiles: "all"
+        services: "{{ item.name }}"
+        state: "{{ item.state }}"
+      loop: "{{ compose_apps | selectattr('state', 'equalto', 'absent') }}"
+      failed_when: stderr is defined and 'no such service' not in stderr
+
+    - name: Remove Apps Configure Files
+      ansible.builtin.file:
+        path: "{{ compose_root_dir }}/appdata/{{ item.name }}"
+        state: absent
+      loop: "{{ compose_apps | selectattr('rm_conf', 'truthy') | selectattr('state', 'equalto', 'absent') }}"
+
+- name: Copy docker compose file to server
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../roles/compose/templates/docker-compose.j2"
+    dest: "{{ compose_root_dir }}/docker-compose.yml"
+    mode: "775"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Add apps path to main docker-compose file (lineinfile)
+  ansible.builtin.lineinfile:
+    path: "{{ compose_root_dir }}/docker-compose.yml"
+    line: "  - compose/$HOSTNAME/{{ item.name }}.yml"
+    insertafter: "SERVICES"
+    state: "{{ item.state }}"
+  loop: "{{ compose_apps }}"
+
+- name: Deploy Docker Compose Apps
+  community.docker.docker_compose_v2:
+    project_src: "{{ compose_root_dir }}"
+    profiles: "all"
+    services: "{{ item.name }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ compose_apps | rejectattr('state', 'equalto', 'absent') }}"
+
+- name: Generate Sing-box Configure
+  ansible.builtin.include_tasks: sing-box.yml
+  when: (compose_apps | selectattr('name', 'equalto', 'sing-box') | map(attribute='state') | first | default('absent')) != 'absent'

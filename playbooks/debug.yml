@@ -1,6 +1,6 @@
 ---
 - name: Test compose role
-  hosts: localhost
+  hosts: localvm
   roles:
     - role: compose
       vars:
@@ -8,6 +8,6 @@
         compose_proxy_enable: true
         compose_traefik_enable: false
         compose_apps:
-          # - sing-box
-          - portainer
-          # - semaphore
+          - name: portainer
+            state: present
+            rm_conf: true

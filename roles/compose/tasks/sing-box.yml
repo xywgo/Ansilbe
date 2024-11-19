@@ -44,7 +44,7 @@
       Public Key: {{ reality_public_key }}
       Short ID: {{ reality_short_id }}
       UUID: {{ reality_uuid }}
-    dest: "/tmp/reality_keys_info.txt"
+    dest: "./tmp/{{ ansible_hostname }}_reality_keys_info.txt"
     mode: "0644"
   delegate_to: localhost
 
@@ -66,7 +66,7 @@
 - name: Upload the generated config to remote server
   ansible.builtin.copy:
     src: "/tmp/config.json"
-    dest: "{{ compose_user_dir }}/{{ compose_root_dir }}/appdata/sing-box"
+    dest: "{{ compose_root_dir }}/appdata/sing-box/config.json"
     owner: root
     group: root
     mode: "0644"
@@ -75,5 +75,5 @@
   community.docker.docker_compose_v2:
     project_src: "{{ compose_root_dir }}" # 根据路径调整
     state: restarted
-  become: true
-  when: compose_apps is defined and 'sing-box' in compose_apps
+    services:
+      - sing-box

@@ -5,7 +5,8 @@
 该 Ansible 角色用于自动化部署和管理 Docker Compose 配置文件及其相关应用容器。它将根据模板渲染配置文件，并通过 Docker Compose 启动容器，简化了 Docker 应用的部署过程。
 
 ## 功能
-
+- 创建远程服务器的目录环境
+- 渲染并生成环境环境`.env`
 - 渲染并生成 `docker-compose.yml` 配置文件。
 - 将生成的配置文件部署到指定的远程服务器目录。
 - 使用 Docker Compose 启动和管理容器服务。
@@ -72,6 +73,23 @@ env_file: "{{ compose_dir }}/.env"
 
 # Docker Compose 服务配置的其他目录路径
 app_data_dir: "/opt/docker/appdata"
+```
+## 管理容器
+
+### 示例
+```yaml
+- name: Test compose role
+  hosts: localhost
+  roles:
+    - role: compose
+      vars:
+        compose_root_dir: /home/ubuntu/containers # 配置默认的容器管理目录
+        compose_proxy_enable: true  # 选择true就配置网络
+        compose_traefik_enable: false # 部署traefik时打开
+        compose_apps:  # 需要开启的容器，容器的compose文件需要先放置再roles/file目录下
+          - name: portainer  # 容器名称
+            state: present  # present 表示编排部署容器，absent 表示删除容器
+            rm_conf: false  # 是否删除容器保存在~/containers/appdata的持久化数据
 ```
 
 ## 使用示例

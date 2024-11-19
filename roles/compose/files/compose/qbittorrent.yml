@@ -1,0 +1,23 @@
+services:
+  # qBittorrent - Torrent downloader
+  # Needs trailing / if using PathPrefixStrip
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles: ["apps", "storage", "download", "all"]
+    networks:
+      - nproxy
+    ports:
+      - "8080:8080"
+      - "5375:5375"
+    volumes:
+      - $APPDATA/qbittorrent:/config
+      - $DOWNLOADSDIR:/downloads
+    environment:
+      TZ: $TZ
+      PUID: $PUID
+      PGID: $PGID
+      UMASK_SET: 002

@@ -6,5 +6,8 @@
 compose_root_dir: /home/{{ ansible_user }}/containers
 compose_user_dir: "/home/{{ ansible_user | default('ubuntu') }}"
 compose_data_dir: "{{ compose_user_dir }}/data"
+
 compose_proxy_enable: false
 compose_traefik_enable: false
+
+compose_config: false
