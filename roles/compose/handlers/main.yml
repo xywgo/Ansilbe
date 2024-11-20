@@ -13,10 +13,3 @@
   ansible.builtin.debug:
     msg: "{{ acl_output.stdout }}"
   changed_when: false
-
-- name: Restart container to apply the new config
-  community.docker.docker_compose_v2:
-    project_src: "{{ compose_root_dir }}" # 根据路径调整
-    state: restarted
-    services:
-      - sing-box

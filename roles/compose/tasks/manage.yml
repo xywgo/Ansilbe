@@ -49,9 +49,3 @@
     services: "{{ item.name }}"
     state: "{{ item.state | default('present') }}"
   loop: "{{ compose_apps | rejectattr('state', 'equalto', 'absent') }}"
-
-- name: Generate Sing-box Configure
-  ansible.builtin.include_tasks: sing-box.yml
-  when:
-    - (compose_apps | selectattr('name', 'equalto', 'sing-box') | map(attribute='state') | first | default('absent')) != 'absent'
-    - (compose_apps | selectattr('name', 'equalto', 'sing-box') | map(attribute='genconf') | first | default('false'))

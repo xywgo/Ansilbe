@@ -30,4 +30,4 @@
         compose_apps:
           # - sing-box
           - portainer
-          # - semaphore
+          # - semaphore     
