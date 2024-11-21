@@ -1,6 +1,6 @@
 ---
 - name: Test compose role
-  hosts: localvm
+  hosts: cloud
   roles:
     - role: compose
       vars:
@@ -9,12 +9,23 @@
         compose_traefik_enable: false
         compose_apps:
           - name: portainer
-            state: absent
-            rm_conf: true
+            state: present
+            rm_conf: false
           - name: sing-box
-            state: absent
-            rm_conf: true
-          - name: qbittorrent
-            state: absent
-            rm_conf: true
-
+            state: present
+            rm_conf: false
+    - role: sing-box-gen
+      vars:
+        sing_box_log: false
+        sing_box_log_level: "info"
+        sing_box_ss_enable: true
+        sing_box_vless_enable: true
+        sing_box_vmess_enable: true
+        sing_box_hysteria2_enable: false
+        sing_box_tuic_enable: false
+        # sing_box_ss_users:
+        #   - name: "user1"
+        multiplex_enable: true
+        multiplex_padding: true
+        brutal_enable: false
+        # Add other necessary variables here

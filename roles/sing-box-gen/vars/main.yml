@@ -1,0 +1,15 @@
+# Fixed Directory Structure
+containers_path: /home/{{ ansible_user }}/containers
+user_path: "/home/{{ ansible_user | default('ubuntu') }}"
+
+sing_box_config_path: "{{ containers_path }}/appdata/sing-box"
+cert_path: "{{ playbook_dir }}/../roles/sing-box-gen/files/certs"
+
+# Fixed TLS Certificate Paths
+sing_box_vmess_tls_server: "bing.com"
+sing_box_vmess_tls_cert: "/etc/sing-box/bing.com.crt"
+sing_box_vmess_tls_key: "/etc/sing-box/bing.com.key"
+
+# Fixed Protocol Tags for Route Rules
+protocol: []
+

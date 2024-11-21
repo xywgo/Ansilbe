@@ -1,0 +1,231 @@
+{#
+参考: https://linux.do/t/topic/164615 进行修改和配置
+#}
+{
+  "log": {
+    "disabled": {{ sing_box_log | default(false) | lower }},
+    "level": "{{ sing_box_log_level | default('info') }}",
+    "timestamp": true
+  },
+  "inbounds": [
+    {% if sing_box_ss_enable %}
+    {
+      "type": "shadowsocks",
+      "tag": "ss-in",
+      "listen": "::",
+      "listen_port": {{ sing_box_ss_port | default(43210) }},
+      "method": "{{ sing_box_ss_method | default('2022-blake3-aes-128-gcm') }}",
+      "password": "{{ sing_box_ss_password }}",
+      "users": [
+        {% for user in sing_box_ss_users %}
+        {
+          "name": "{{ user.name }}",
+          "password": "{{ user.password }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "multiplex": {
+        "enabled": {{ multiplex_enable | lower }},
+        "padding": {{ multiplex_padding | lower }}
+        {% if brutal_enable %}
+        ,
+        "brutal": {
+          "enabled": {{ brutal_enable | lower }},
+          "up_mbps": {{ brutal_up }},
+          "down_mbps": {{ brutal_down }}
+        }
+        {% endif %}
+      }
+    }{% if sing_box_vless_enable or sing_box_vmess_enable or sing_box_vmess_tls_enable or sing_box_hysteria2_enable or sing_box_tuic_enable %},{% endif %}
+    {% endif %}
+
+    {% if sing_box_vless_enable %}
+    {
+      "type": "vless",
+      "tag": "vless-in",
+      "listen": "::",
+      "listen_port": {{ sing_box_vless_port | default(43211) }},
+      "users": [
+        {% for user in sing_box_vless_users %}
+        {
+          "name": "{{ user.name }}",
+          "uuid": "{{ user.uuid }}",
+          "flow": "{{ user.flow | default('') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "tls": {
+        "enabled": {{ tls_enable | default(true) | lower }},
+        "server_name": "{{ tls_server_name }}",
+        "reality": {
+          "enabled": {{ tls_reality_enable | default(true) | lower }},
+          "handshake": {
+            "server": "{{ tls_handshake_server }}",
+            "server_port": {{ tls_handshake_server_port }}
+          },
+          "private_key": "{{ tls_private_key }}",
+          "short_id": [
+            {% for id in tls_short_id %}
+            "{{ id }}"{{ "," if not loop.last else "" }}
+            {% endfor %}
+          ]
+        }
+      },
+      "multiplex": {
+        "enabled": {{ multiplex_enable | lower }},
+        "padding": {{ multiplex_padding | lower }}
+        {% if brutal_enable %}
+        ,
+        "brutal": {
+          "enabled": {{ brutal_enable | lower }},
+          "up_mbps": {{ brutal_up }},
+          "down_mbps": {{ brutal_down }}
+        }
+        {% endif %}
+      }
+    }{% if sing_box_vmess_enable or sing_box_vmess_tls_enable or sing_box_hysteria2_enable or sing_box_tuic_enable %},{% endif %}
+    {% endif %}
+
+    {% if sing_box_vmess_enable %}
+    {
+      "type": "vmess",
+      "tag": "vmess-in",
+      "listen": "::",
+      "listen_port": {{ sing_box_vmess_port | default(43212) }},
+      "sniff": true,
+      "sniff_override_destination": true,
+      "transport": {
+        "type": "ws",
+        "path": "{{ sing_box_vmess_path }}",
+        "max_early_data": {{ sing_box_vmess_early_data }},
+        "early_data_header_name": "{{ sing_box_vmess_header }}"
+      },
+      "users": [
+        {% for user in sing_box_vmess_users %}
+        {
+          "name": "{{ user.name }}",
+          "uuid": "{{ user.uuid }}",
+          "alterId": {{ user.alterId | default(0) }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "multiplex": {
+        "enabled": {{ multiplex_enable | lower }},
+        "padding": {{ multiplex_padding | lower }}
+        {% if brutal_enable %}
+        ,
+        "brutal": {
+          "enabled": {{ brutal_enable | lower }},
+          "up_mbps": {{ brutal_up }},
+          "down_mbps": {{ brutal_down }}
+        }
+        {% endif %}
+      }
+    }{% if sing_box_vmess_tls_enable or sing_box_hysteria2_enable or sing_box_tuic_enable %},{% endif %}
+    {% endif %}
+
+    {% if sing_box_hysteria2_enable %}
+    {
+      "type": "hysteria2",
+      "tag": "hysteria2-in",
+      "listen": "::",
+      "listen_port": {{ sing_box_hysteria2_port | default(43214) }},
+      "sniff": true,
+      "sniff_override_destination": true,
+      "up_mbps": {{ sing_box_hysteria2_up_mbps }},
+      "down_mbps": {{ sing_box_hysteria2_down_mbps }},
+      "obfs": {
+        "type": "{{ sing_box_hysteria2_obfs_type }}",
+        "password": "{{ sing_box_hysteria2_obfs_password }}"
+      },
+      "users": [
+        {% for user in sing_box_hysteria2_users %}
+        {
+          "name": "{{ user.name }}",
+          "password": "{{ user.password }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "ignore_client_bandwidth": {{ sing_box_hysteria2_ignore_client_bandwidth | lower }},
+      "masquerade": "{{ sing_box_hysteria2_masquerade }}",
+      "tls": {
+        "enabled": true,
+        "server_name": "{{ sing_box_vmess_tls_server }}",
+        "certificate_path": "{{ sing_box_vmess_tls_cert }}",
+        "key_path": "{{ sing_box_vmess_tls_key }}"
+      },
+      "multiplex": {
+        "enabled": {{ multiplex_enable | lower }},
+        "padding": {{ multiplex_padding | lower }}
+        {% if brutal_enable %}
+        ,
+        "brutal": {
+          "enabled": {{ brutal_enable | lower }},
+          "up_mbps": {{ brutal_up }},
+          "down_mbps": {{ brutal_down }}
+        }
+        {% endif %}
+      },
+      "brutal_debug": {{ sing_box_hysteria2_brutal_debug | default(false) | lower }}
+    }{% if sing_box_tuic_enable %},{% endif %}
+    {% endif %}
+
+    {% if sing_box_tuic_enable %}
+    {
+      "type": "tuic",
+      "tag": "tuic-in",
+      "listen": "::",
+      "listen_port": {{ sing_box_tuic_port | default(43215) }},
+      "sniff": true,
+      "sniff_override_destination": true,
+      "users": [
+        {% for user in sing_box_tuic_users %}
+        {
+          "name": "{{ user.name }}",
+          "uuid": "{{ user.uuid }}",
+          "password": "{{ user.password }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "congestion_control": "{{ sing_box_tuic_congestion }}",
+      "auth_timeout": "{{ sing_box_tuic_auth_timeout }}",
+      "heartbeat": "{{ sing_box_tuic_heartbeat }}",
+      "zero_rtt_handshake": {{ sing_box_tuic_zero_rtt_handshake | default(true) | lower }},
+      "tls": {
+        "enabled": true,
+        "server_name": "{{ sing_box_vmess_tls_server }}",
+        "certificate_path": "{{ sing_box_vmess_tls_cert }}",
+        "key_path": "{{ sing_box_vmess_tls_key }}"
+      },
+      "multiplex": {
+        "enabled": {{ multiplex_enable | lower }},
+        "padding": {{ multiplex_padding | lower }}
+        {% if brutal_enable %}
+        ,
+        "brutal": {
+          "enabled": {{ brutal_enable | lower }},
+          "up_mbps": {{ brutal_up }},
+          "down_mbps": {{ brutal_down }}
+        }
+        {% endif %}
+      }
+    }
+    {% endif %}
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {% for inbound in sing_box_protocol %}
+      {
+        "inbound": ["{{ inbound.tag }}"],
+        "outbound": "direct"
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}

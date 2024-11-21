@@ -1,0 +1,84 @@
+# Performance Settings (Customizable)
+multiplex_enable: true
+multiplex_padding: true
+brutal_enable: false
+brutal_up: 600
+brutal_down: 600
+
+# Log Settings (Customizable)
+sing_box_log: false
+sing_box_log_level: "info"
+
+# Protocol Enable Flags (Customizable)
+sing_box_ss_enable: true
+sing_box_vless_enable: true
+sing_box_vmess_enable: false
+sing_box_vmess_tls_enable: false
+sing_box_hysteria2_enable: false
+sing_box_tuic_enable: false
+
+# Protocol Ports (Customizable)
+sing_box_ss_port: 43210
+sing_box_vless_port: 43211
+sing_box_vmess_port: 43212
+sing_box_vmess_tls_port: 43213
+sing_box_hysteria2_port: 43214
+sing_box_tuic_port: 43215
+
+# Protocol Credentials (Should be customized)
+sing_box_ss_method: "2022-blake3-aes-256-gcm"  # surge not support try to use chacha20-ietf-poly1305 instead
+sing_box_ss_password: "u7VZlYjHmVNqpLFIsvdCSTtn3j8q87sDR6JBbmJ442Q=" # if change method, need to change password
+sing_box_ss_users:
+  - name: "xywgo"
+    password: "PCD2Z4o12bKUoFa3cC97Hw=="
+
+sing_box_vless_users:
+  - name: "xywgo"
+    uuid: "6bd95dcb-1499-482d-9741-70ac1cbc4710"
+    flow: "xtls-rprx-vision"
+
+sing_box_vmess_users:
+  - name: "xywgo"
+    uuid: "36c5343f-4d49-414b-9741-bacfd6799e8f"
+    alterId: 0
+
+sing_box_hysteria2_users:
+  - name: "xywgo"
+    password: "PK2WxrGN282LyEZHYBM3Lv7xvhh5J09xMh"
+
+sing_box_tuic_users:
+  - name: "xywgo"
+    uuid: "41b9b4d2-4800-41c0-b6fc-bcfc57db1524"
+    password: "eUhQ4KeUckXReB1mQ2jWRB0py6TpB61eMX"
+
+# TLS Settings (Should be customized)
+tls_enable: true
+tls_server_name: "icloud.cdn-apple.com"
+tls_reality_enable: true
+tls_handshake_server: "icloud.cdn-apple.com"
+tls_handshake_server_port: 443
+tls_private_key: "0H5tYLhpDT_r675UC93iWAS2LqN6mPZoDcVDqsff018"
+tls_public_key: ""
+tls_short_id: ["429cca4e7bbf30c4"]
+
+# Protocol Specific Settings (Customizable)
+sing_box_vmess_path: "/vmess"
+sing_box_vmess_early_data: 2048
+sing_box_vmess_header: "Sec-WebSocket-Protocol"
+sing_box_hysteria2_obfs_type: "salamander"
+sing_box_hysteria2_obfs_password: "Q6KAN1H5roQAAwV1csL2YVjD9GAKgr2bv7"
+sing_box_hysteria2_up_mbps: 600
+sing_box_hysteria2_down_mbps: 600
+sing_box_hysteria2_masquerade: "https://www.bing.com"
+sing_box_hysteria2_tls_server: "bing.com"
+sing_box_hysteria2_tls_cert: "/etc/sing-box/bing.com.crt"
+sing_box_hysteria2_tls_key: "/etc/sing-box/bing.com.key"
+sing_box_hysteria2_ignore_client_bandwidth: false
+sing_box_hysteria2_brutal_debug: false
+sing_box_tuic_congestion: "bbr"
+sing_box_tuic_auth_timeout: "3s"
+sing_box_tuic_heartbeat: "10s"
+sing_box_tuic_tls_server: "bing.com"
+sing_box_tuic_tls_cert: "/etc/sing-box/bing.com.crt"
+sing_box_tuic_tls_key: "/etc/sing-box/bing.com.key"
+sing_box_tuic_zero_rtt_handshake: true

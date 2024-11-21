@@ -1,0 +1,219 @@
+---
+- name: Generate Shadowsocks parameters
+  when: sing_box_ss_enable | default(false) | bool
+  block:
+    - name: Generate Shadowsocks password
+      ansible.builtin.set_fact:
+        sing_box_ss_password: "{{ lookup('pipe', 'sing-box generate rand 32 --base64') }}"
+
+    - name: Generate Shadowsocks port
+      ansible.builtin.set_fact:
+        sing_box_ss_port: "{{ range(40000, 50001) | random }}"
+
+    - name: Generate Shadowsocks users
+      ansible.builtin.set_fact:
+        sing_box_ss_users:
+          - name: "{{ lookup('pipe', 'sing-box generate rand 4 --base64 | cut -c1-5') }}"
+            password: "{{ lookup('pipe', 'sing-box generate rand 32 --base64') }}"
+
+- name: Debug Shadowsocks users
+  ansible.builtin.debug:
+    var: sing_box_ss_users
+
+- name: Generate VLESS parameters
+  when: sing_box_vless_enable | default(false) | bool
+  block:
+    - name: Generate VLESS port
+      ansible.builtin.set_fact:
+        sing_box_vless_port: "{{ range(40000, 50001) | random }}"
+
+    - name: Generate VLESS users
+      ansible.builtin.set_fact:
+        sing_box_vless_users:
+          - name: "{{ lookup('pipe', 'sing-box generate rand 4 --base64 | cut -c1-5') }}"
+            uuid: "{{ lookup('pipe', 'sing-box generate uuid') }}"
+            flow: "xtls-rprx-vision"
+
+    - name: Generate Reality keypair
+      ansible.builtin.command: "sing-box generate reality-keypair"
+      register: reality_keypair
+      changed_when: false
+      delegate_to: localhost
+
+    - name: Set TLS private key
+      ansible.builtin.set_fact:
+        tls_private_key: "{{ reality_keypair.stdout_lines[0].split(': ')[1] | trim }}"
+
+    - name: Set TLS public key
+      ansible.builtin.set_fact:
+        tls_public_key: "{{ reality_keypair.stdout_lines[1].split(': ')[1] | trim }}"
+
+    - name: Generate TLS short ID
+      ansible.builtin.set_fact:
+        tls_short_id: ["{{ lookup('pipe', 'sing-box generate rand 8 --hex') | trim }}"]
+
+- name: Generate VMess parameters
+  when: sing_box_vmess_enable | default(false) | bool
+  block:
+    - name: Generate VMess port
+      ansible.builtin.set_fact:
+        sing_box_vmess_port: "{{ range(40000, 50001) | random }}"
+
+    - name: Generate VMess users
+      ansible.builtin.set_fact:
+        sing_box_vmess_users:
+          - name: "{{ lookup('pipe', 'sing-box generate rand 4 --base64 | cut -c1-5') }}"
+            uuid: "{{ lookup('pipe', 'sing-box generate uuid') }}"
+
+- name: Generate Hysteria2 parameters
+  when: sing_box_hysteria2_enable | default(false) | bool
+  block:
+    - name: Generate Hysteria2 port
+      ansible.builtin.set_fact:
+        sing_box_hysteria2_port: "{{ range(40000, 50001) | random }}"
+
+    - name: Generate Hysteria2 obfs password
+      ansible.builtin.set_fact:
+        sing_box_hysteria2_obfs_password: "{{ lookup('pipe', 'sing-box generate rand 16 --base64') }}"
+
+    - name: Generate Hysteria2 users
+      ansible.builtin.set_fact:
+        sing_box_hysteria2_users:
+          - name: "{{ lookup('pipe', 'sing-box generate rand 4 --base64 | cut -c1-5') }}"
+            password: "{{ lookup('pipe', 'sing-box generate rand 16 --base64') }}"
+    - name: Upload Hysteria2 Certificate
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ sing_box_config_path }}"
+        mode: '0644'
+      with_items:
+        - "{{ cert_path }}/bing.com.crt"
+        - "{{ cert_path }}/bing.com.key"
+
+- name: Generate Tuic parameters
+  when: sing_box_tuic_enable | default(false) | bool
+  block:
+    - name: Generate Tuic port
+      ansible.builtin.set_fact:
+        sing_box_tuic_port: "{{ range(40000, 50001) | random }}"
+
+    - name: Generate Tuic users
+      ansible.builtin.set_fact:
+        sing_box_tuic_users:
+          - name: "{{ lookup('pipe', 'sing-box generate rand 4 --base64 | cut -c1-5') }}"
+            uuid: "{{ lookup('pipe', 'sing-box generate uuid') }}"
+            password: "{{ lookup('pipe', 'sing-box generate rand 16 --base64') }}"
+    - name: Upload Tuic Certificate
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ sing_box_config_path }}"
+        mode: '0644'
+      with_items:
+        - "{{ cert_path }}/bing.com.crt"
+        - "{{ cert_path }}/bing.com.key"
+
+- name: Ensure local tmp directory exists
+  ansible.builtin.file:
+    path: "./tmp"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+
+- name: Generate sing-box config from template
+  ansible.builtin.template:
+    src: "config.json.j2"
+    dest: "./tmp/config.json"
+    mode: '0644'
+  delegate_to: localhost
+
+- name: Upload config to remote server
+  ansible.builtin.copy:
+    src: "./tmp/config.json"
+    dest: "{{ sing_box_config_path }}/config.json"
+    mode: '0644'
+  notify: Restart container to apply the new config
+
+- name: Save SS configuration locally
+  ansible.builtin.copy:
+    content: |
+      Port: {{ sing_box_ss_port }}
+      Method: {{ sing_box_ss_method }}
+      Password: {{ sing_box_ss_password }}
+      Users:
+      {% for user in sing_box_ss_users %}
+        Name: {{ user.name }}
+        Password: {{ user.password }}
+      {% endfor %}
+    dest: "./tmp/ss_config.txt"
+    mode: '0644'
+  when: sing_box_ss_enable | default(false) | bool
+  delegate_to: localhost
+
+- name: Save VLESS configuration locally
+  ansible.builtin.copy:
+    content: |
+      Port: {{ sing_box_vless_port }}
+      Users:
+      {% for user in sing_box_vless_users %}
+        Name: {{ user.name }}
+        UUID: {{ user.uuid }}
+        Flow: {{ user.flow }}
+      {% endfor %}
+      TLS:
+        Public Key: {{ tls_public_key }}
+        Short ID: {{ tls_short_id }}
+    dest: "./tmp/vless_config.txt"
+    mode: '0644'
+  when: sing_box_vless_enable | default(false) | bool
+  delegate_to: localhost
+
+- name: Save VMess configuration locally
+  ansible.builtin.copy:
+    content: |
+      Port: {{ sing_box_vmess_port }}
+      Users:
+      {% for user in sing_box_vmess_users %}
+        Name: {{ user.name }}
+        UUID: {{ user.uuid }}
+      {% endfor %}
+    dest: "./tmp/vmess_config.txt"
+    mode: '0644'
+  when: sing_box_vmess_enable | default(false) | bool
+  delegate_to: localhost
+
+- name: Save Hysteria2 configuration locally
+  ansible.builtin.copy:
+    content: |
+      Port: {{ sing_box_hysteria2_port }}
+      Obfs Password: {{ sing_box_hysteria2_obfs_password }}
+      Users:
+      {% for user in sing_box_hysteria2_users %}
+        Name: {{ user.name }}
+        Password: {{ user.password }}
+      {% endfor %}
+    dest: "./tmp/hysteria2_config.txt"
+    mode: '0644'
+  when: sing_box_hysteria2_enable | default(false) | bool
+  delegate_to: localhost
+
+- name: Save Tuic configuration locally
+  ansible.builtin.copy:
+    content: |
+      Port: {{ sing_box_tuic_port }}
+      Users:
+      {% for user in sing_box_tuic_users %}
+        Name: {{ user.name }}
+        UUID: {{ user.uuid }}
+        Password: {{ user.password }}
+      {% endfor %}
+    dest: "./tmp/tuic_config.txt"
+    mode: '0644'
+  when: sing_box_tuic_enable | default(false) | bool
+  delegate_to: localhost
+
+- name: Create links directory if it doesn't exist
+  ansible.builtin.file:
+    path: "./tmp/links"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
